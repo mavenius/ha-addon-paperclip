@@ -25,4 +25,9 @@ mkdir -p "$PAPERCLIP_HOME"
 # by Supervisor, so fix ownership ourselves before dropping to the node user.
 chown -R node:node "$PAPERCLIP_HOME"
 
+# TEMPORARY: snapshot the env right before handing off to docker-entrypoint.sh
+# (still root, no ptrace needed) so we can compare it against what a fresh
+# `docker exec` session sees. Remove once the claude-auth investigation is done.
+env | sort > /data/boot-env.debug.txt
+
 exec docker-entrypoint.sh node --import ./server/node_modules/tsx/dist/loader.mjs server/dist/index.js
