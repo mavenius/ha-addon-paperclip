@@ -17,4 +17,10 @@ export PAPERCLIP_DEPLOYMENT_EXPOSURE=private
 
 mkdir -p "$PAPERCLIP_HOME"
 
+# docker-entrypoint.sh only chowns the image's default /paperclip path, not
+# $PAPERCLIP_HOME, and only when USER_UID/USER_GID differ from the node
+# user's default (1000:1000) -- which they don't here. /data is root-owned
+# by Supervisor, so fix ownership ourselves before dropping to the node user.
+chown -R node:node "$PAPERCLIP_HOME"
+
 exec docker-entrypoint.sh node --import ./server/node_modules/tsx/dist/loader.mjs server/dist/index.js
