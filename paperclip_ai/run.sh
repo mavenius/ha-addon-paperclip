@@ -12,6 +12,8 @@ export HOST=0.0.0.0
 export PORT=3100
 export SERVE_UI=true
 export PAPERCLIP_HOME=/data/paperclip
+export PAPERCLIP_INSTANCE_ID=default
+export PAPERCLIP_CONFIG=/data/paperclip/instances/default/config.json
 export PAPERCLIP_DEPLOYMENT_MODE=authenticated
 export PAPERCLIP_DEPLOYMENT_EXPOSURE=private
 
