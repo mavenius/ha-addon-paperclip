@@ -52,6 +52,28 @@ Working from `packages/adapter-utils/src/execution-target.ts` (`runAdapterExecut
 
 Every manual reproduction that matches Paperclip's actual invocation (user, cwd, env, flags, detachment) succeeds. Only the invocation actually made by Paperclip's own server process fails, every time, with no discernible external difference. This suggests the divergence is something internal to the spawn call we couldn't observe from outside the container (e.g. stdio handling/timing, `resolveSpawnTarget`'s exact resolved command/args, or something Claude Code's own (closed-source) CLI does differently when its parent process is a Node.js `child_process` versus a shell) — I couldn't narrow it further without adding instrumentation to Paperclip's own source or getting visibility into the CLI's internals.
 
-## Workaround
+## Workaround (confirmed)
 
-Switching the adapter to `ANTHROPIC_API_KEY`-based auth avoids this entirely, since it's a separate code path from subscription/credential-file resolution.
+Setting `HOME` to anything other than the upstream image's own default
+(`/paperclip`) is what triggers this. We had pointed `HOME` at a different,
+persisted path (`/data/paperclip`, so `claude login` credentials would
+survive container restarts) — every elimination step above held that
+constant. Reverting `HOME` to the plain, unmodified `/paperclip` default
+(with no other change) made the exact same probe succeed immediately.
+
+We were not able to identify the mechanism (see elimination steps above —
+nothing in `packages/adapter-utils`, `claude-local`, `server/src/config.ts`,
+`server/src/home-paths.ts`, `@paperclipai/shared/home-paths`, or the
+`embedded-postgres` npm package's own source assigns to `process.env.HOME`
+or `os.homedir()`'s output), so this may point to something environment- or
+build-specific rather than a simple code bug — but it's fully, reliably
+reproducible: redirecting `HOME` away from `/paperclip` breaks local
+subscription auth, every time, regardless of directory permissions/ownership
+(tried both `node`-owned and root-owned target directories).
+
+Practical impact for anyone self-hosting via Docker/Kubernetes/similar: if
+you want `claude login` credentials to survive container recreation, you
+cannot simply relocate `$HOME` to a persisted volume path as the obvious
+approach — you're stuck either keeping `HOME` at its container-default
+(unpersisted) location, or using `ANTHROPIC_API_KEY`-based auth instead
+(a separate code path, unaffected by this).
