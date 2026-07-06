@@ -1,11 +1,15 @@
 FROM ghcr.io/paperclipai/paperclip:latest
 
-# Override the upstream image's unpersisted /paperclip home so anything that
-# writes there directly via $HOME (claude login credentials, git config, ssh
-# known_hosts, etc.) lands under Supervisor's persisted /data instead. This
-# applies container-wide, including `docker exec` sessions, not just the
-# process our entrypoint launches.
-ENV HOME=/data/paperclip
+# NOT overriding HOME here (deliberately) -- leaving it at the upstream
+# image's own default (/paperclip, unpersisted). We tried pointing it at
+# /data/paperclip so `claude login` credentials would survive restarts, but
+# that surfaced an unexplained mismatch where Claude Code reported "not
+# logged in" specifically when invoked by Paperclip's own server process,
+# despite every manual reproduction succeeding. Reverting to Paperclip's own
+# default to test whether our deviation was itself the cause. Tradeoff: since
+# /paperclip isn't persisted, `claude login` needs to be redone after every
+# add-on update/reinstall (a plain restart preserves it, since that reuses
+# the same container).
 
 # These are static (don't depend on the add-on's options.json) so bake them
 # in at the image level too, not just as run.sh exports. run.sh's exports

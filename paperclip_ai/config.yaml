@@ -1,5 +1,5 @@
 name: Paperclip AI
-version: "1.0.5"
+version: "1.0.6"
 slug: paperclip_ai
 description: Runs the Paperclip AI multi-agent orchestration server (paperclipai on npm) as a Home Assistant add-on
 url: https://github.com/paperclipai/paperclip
