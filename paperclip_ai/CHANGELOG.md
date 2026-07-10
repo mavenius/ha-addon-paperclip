@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.8
+
+- Adds an optional Telegram bridge: four new config fields
+  (`telegram_bot_token`, `telegram_chat_id`, `telegram_target_issue_id`,
+  `telegram_api_key`), all off by default. When set, `run.sh` starts
+  `telegram_poll.sh` in the background, which long-polls Telegram for new
+  messages in the configured chat and posts them as comments on a fixed
+  Paperclip issue — no LLM call involved, so it's free to run continuously.
+  `telegram_notify.sh` is also bundled for manual outbound sends via
+  `docker exec`. Poll offset is stored under `$PAPERCLIP_HOME` so it
+  survives restarts/updates. See the "Telegram bridge" section in `DOCS.md`.
+
 ## 1.0.7
 
 - Confirmed fix for Claude subscription auth failing with "Not logged in"

@@ -1,5 +1,5 @@
 name: Paperclip AI
-version: "1.0.7"
+version: "1.0.8"
 slug: paperclip_ai
 description: Runs the Paperclip AI multi-agent orchestration server (paperclipai on npm) as a Home Assistant add-on
 url: https://github.com/paperclipai/paperclip
@@ -18,8 +18,16 @@ options:
   openai_api_key: ""
   better_auth_secret: "changeme-generate-a-random-string"
   public_url: ""
+  telegram_bot_token: ""
+  telegram_chat_id: ""
+  telegram_target_issue_id: ""
+  telegram_api_key: ""
 schema:
   anthropic_api_key: str?
   openai_api_key: str?
   better_auth_secret: str
   public_url: str?
+  telegram_bot_token: password?
+  telegram_chat_id: str?
+  telegram_target_issue_id: str?
+  telegram_api_key: password?
