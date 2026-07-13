@@ -28,6 +28,8 @@ ENV PORT=3100
 ENV SERVE_UI=true
 
 COPY run.sh /run.sh
-RUN chmod a+x /run.sh
+COPY telegram_poll.sh /telegram_poll.sh
+COPY telegram_notify.sh /telegram_notify.sh
+RUN chmod a+x /run.sh /telegram_poll.sh /telegram_notify.sh
 
 ENTRYPOINT ["/run.sh"]

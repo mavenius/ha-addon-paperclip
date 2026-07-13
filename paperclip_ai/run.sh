@@ -7,6 +7,10 @@ export ANTHROPIC_API_KEY="$(jq -r '.anthropic_api_key // empty' "$OPTIONS")"
 export OPENAI_API_KEY="$(jq -r '.openai_api_key // empty' "$OPTIONS")"
 export BETTER_AUTH_SECRET="$(jq -r '.better_auth_secret' "$OPTIONS")"
 export PAPERCLIP_PUBLIC_URL="$(jq -r '.public_url // empty' "$OPTIONS")"
+export TELEGRAM_BOT_TOKEN="$(jq -r '.telegram_bot_token // empty' "$OPTIONS")"
+export TELEGRAM_CHAT_ID="$(jq -r '.telegram_chat_id // empty' "$OPTIONS")"
+export TELEGRAM_TARGET_ISSUE_ID="$(jq -r '.telegram_target_issue_id // empty' "$OPTIONS")"
+export TELEGRAM_API_KEY="$(jq -r '.telegram_api_key // empty' "$OPTIONS")"
 
 # Static vars (PAPERCLIP_HOME, PAPERCLIP_CONFIG, deployment mode/exposure,
 # HOST/PORT/SERVE_UI) are baked in as Dockerfile ENV instead of exported here,
@@ -68,5 +72,18 @@ chown -R node:node /paperclip
     fi
   done
 ) &
+
+# Optional Telegram inbound bridge (see telegram_poll.sh): only starts if all
+# four fields are configured on the Configuration tab. Team members can then
+# reply in that Telegram chat and have it show up as a comment on the fixed
+# target issue. Disabled (skipped entirely) by default -- nothing here talks
+# to Telegram unless explicitly opted into.
+if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ] \
+  && [ -n "$TELEGRAM_TARGET_ISSUE_ID" ] && [ -n "$TELEGRAM_API_KEY" ]; then
+  echo "Starting Telegram inbound poller (target issue: $TELEGRAM_TARGET_ISSUE_ID)"
+  /telegram_poll.sh &
+else
+  echo "Telegram bridge not configured (telegram_bot_token/telegram_chat_id/telegram_target_issue_id/telegram_api_key), skipping"
+fi
 
 exec docker-entrypoint.sh node --import ./server/node_modules/tsx/dist/loader.mjs server/dist/index.js

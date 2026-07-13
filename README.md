@@ -23,6 +23,11 @@ variables, since the upstream image doesn't know about HA's options format.
    - `openai_api_key` — optional, only if you want agents that use OpenAI.
    - `public_url` — e.g. `http://homeassistant.local:3100` or whatever
      address you'll reach the add-on at. Needed for auth redirects to work.
+   - `telegram_bot_token` / `telegram_chat_id` / `telegram_target_issue_id` /
+     `telegram_api_key` — optional, all off by default. Lets a team reply in
+     a Telegram chat and have it land as a comment on a fixed Paperclip
+     issue. See the **Telegram bridge** section in `paperclip_ai/DOCS.md` (or
+     the add-on's **Documentation** tab) for setup steps.
 5. **Start** the add-on, check the **Log** tab for errors.
 6. Open `http://<your-ha-ip>:3100` for the Paperclip dashboard.
 
