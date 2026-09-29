@@ -28,10 +28,23 @@ ENV PORT=3100
 ENV SERVE_UI=true
 
 # ttyd: web terminal behind Home Assistant ingress, for the interactive
-# `claude auth login` flow (see claude_login.sh).
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends ttyd \
-  && rm -rf /var/lib/apt/lists/*
+# `claude auth login` flow (see claude_login.sh). Not packaged for Debian
+# trixie (the upstream image's base), so install the project's official
+# static release binary, pinned and checksum-verified.
+ARG TTYD_VERSION=1.7.7
+ARG TTYD_SHA256_AMD64=8a217c968aba172e0dbf3f34447218dc015bc4d5e59bf51db2f2cd12b7be4f55
+ARG TTYD_SHA256_ARM64=b38acadd89d1d396a0f5649aa52c539edbad07f4bc7348b27b4f4b7219dd4165
+RUN set -eux; \
+    arch="$(dpkg --print-architecture)"; \
+    case "$arch" in \
+      amd64) ttydArch="x86_64"; sha256="$TTYD_SHA256_AMD64" ;; \
+      arm64) ttydArch="aarch64"; sha256="$TTYD_SHA256_ARM64" ;; \
+      *) echo "unsupported architecture: $arch" >&2; exit 1 ;; \
+    esac; \
+    curl -fsSLo /usr/local/bin/ttyd "https://github.com/tsl0922/ttyd/releases/download/${TTYD_VERSION}/ttyd.${ttydArch}"; \
+    echo "${sha256}  /usr/local/bin/ttyd" | sha256sum -c -; \
+    chmod a+x /usr/local/bin/ttyd; \
+    ttyd --version
 
 COPY run.sh /run.sh
 COPY telegram_poll.sh /telegram_poll.sh

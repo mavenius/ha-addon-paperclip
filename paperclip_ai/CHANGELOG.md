@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.10
+
+- Fixes the 1.0.9 image build failing: `ttyd` isn't packaged for Debian
+  trixie (the upstream image's base), so `apt-get install ttyd` errored.
+  It's now installed from ttyd's official static release binary (1.7.7),
+  pinned and checksum-verified per architecture.
+
 ## 1.0.9
 
 - Adds a **Claude Login** page served through Home Assistant ingress
