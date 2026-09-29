@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.9
+
+- Adds a **Claude Login** page served through Home Assistant ingress
+  (**Open Web UI** on the add-on's Info tab, or the optional sidebar
+  panel). It's a web terminal (`ttyd`) that runs a fixed menu around
+  `claude auth login` / `logout` / `status` as the `node` user, so the
+  interactive subscription login no longer needs `docker exec`. It never
+  gives a shell.
+- Logins and logouts from that page are copied to
+  `$PAPERCLIP_HOME/claude-home` immediately, not on the next 60-second
+  sync. The backup logic moved from `run.sh` into `claude_backup.sh` so
+  both paths share it.
+
 ## 1.0.8
 
 - Adds an optional Telegram bridge: four new config fields
