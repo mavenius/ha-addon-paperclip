@@ -14,7 +14,19 @@ Open the add-on's web UI (port 3100, or your `public_url`), sign up, then choose
 
 ## Logging into Claude with a subscription (Pro/Max) instead of an API key
 
-If you want agents to run on your Claude subscription rather than `anthropic_api_key`, you need to log in interactively, once, via a shell in the container. This **cannot** be done from this config page — it requires an interactive OAuth flow.
+If you want agents to run on your Claude subscription rather than `anthropic_api_key`, you need to log in interactively, once. Leave `anthropic_api_key` empty, or agents will keep billing against the key.
+
+### From Home Assistant (recommended)
+
+1. On this add-on's **Info** tab, click **Open Web UI** (or enable **Show in sidebar** to get a **Claude Login** panel).
+2. The page shows a small terminal menu with your current Claude login status. Choose **1** to log in with a subscription.
+3. Open the URL it prints, authorize in your browser, and paste the code back into the terminal.
+
+The login is saved to persistent storage immediately, so it survives restarts and add-on updates. The same page can log out, or log in with an Anthropic Console account instead. It only runs `claude auth` commands: it is not a general shell and doesn't start a Claude session.
+
+The add-on's **Configuration** tab is a fixed settings form, so the login can't run there directly; the web UI is the closest place Home Assistant allows. The Paperclip app itself is still on port 3100 (or your `public_url`).
+
+### From a shell (alternative)
 
 1. Install the **Terminal & SSH** add-on if you don't already have shell access to the Home Assistant host.
 2. Find this add-on's container name: `docker ps | grep paperclip` (something like `addon_<hash>_paperclip_ai`).
@@ -27,7 +39,7 @@ If you want agents to run on your Claude subscription rather than `anthropic_api
 
 That's it — the login survives add-on updates/reinstalls automatically. Claude's login state lives at `/paperclip/.claude`, which isn't itself part of Supervisor's persisted `/data` volume (see the comment in this repo's `Dockerfile` for why we can't just relocate it there directly), but `run.sh` shadows a copy of it into `$PAPERCLIP_HOME/claude-home` (which *is* persisted) and restores it automatically on every boot. It also re-syncs that backup every 60 seconds while running, so a fresh login or a token refresh gets captured without any manual step.
 
-If Paperclip's UI ever reports "Not logged in" after an update, it most likely means you logged in for the first time less than a minute before the add-on was updated/restarted (missing the sync window) — just repeat step 3.
+If Paperclip's UI ever reports "Not logged in" after an update, it most likely means you logged in from a shell less than a minute before the add-on was updated/restarted (missing the sync window). Just log in again. Logins from the web UI save immediately, so they don't have this gap.
 
 ## Telegram bridge (optional)
 

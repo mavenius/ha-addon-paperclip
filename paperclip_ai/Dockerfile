@@ -27,9 +27,18 @@ ENV HOST=0.0.0.0
 ENV PORT=3100
 ENV SERVE_UI=true
 
+# ttyd: web terminal behind Home Assistant ingress, for the interactive
+# `claude auth login` flow (see claude_login.sh).
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ttyd \
+  && rm -rf /var/lib/apt/lists/*
+
 COPY run.sh /run.sh
 COPY telegram_poll.sh /telegram_poll.sh
 COPY telegram_notify.sh /telegram_notify.sh
-RUN chmod a+x /run.sh /telegram_poll.sh /telegram_notify.sh
+COPY claude_backup.sh /claude_backup.sh
+COPY claude_login.sh /claude_login.sh
+RUN chmod a+x /run.sh /telegram_poll.sh /telegram_notify.sh \
+  /claude_backup.sh /claude_login.sh
 
 ENTRYPOINT ["/run.sh"]

@@ -52,24 +52,32 @@ fi
 chown -R node:node /paperclip
 
 # Keep the backup in sync with whatever's live at /paperclip/.claude while
-# the server runs, so a fresh `claude login` (or a token refresh) gets
-# captured automatically instead of requiring a manual step. Runs as root in
-# the background; ownership under $CLAUDE_BACKUP doesn't matter since only
-# this script ever reads it (unlike /paperclip/.claude itself, which the
-# node-uid server process needs to read directly).
+# the server runs, so a `docker exec` login (or a token refresh) gets
+# captured automatically instead of requiring a manual step. Logins from the
+# ingress page (below) also save immediately. Runs as root in the
+# background; ownership under $CLAUDE_BACKUP doesn't matter since only this
+# script ever reads it (unlike /paperclip/.claude itself, which the node-uid
+# server process needs to read directly).
 (
   while true; do
     sleep 60
-    mkdir -p "$CLAUDE_BACKUP"
-    if [ -d /paperclip/.claude ]; then
-      rm -rf "$CLAUDE_BACKUP/.claude.new"
-      cp -a /paperclip/.claude "$CLAUDE_BACKUP/.claude.new" \
-        && rm -rf "$CLAUDE_BACKUP/.claude" \
-        && mv "$CLAUDE_BACKUP/.claude.new" "$CLAUDE_BACKUP/.claude"
-    fi
-    if [ -f /paperclip/.claude.json ]; then
-      cp -a /paperclip/.claude.json "$CLAUDE_BACKUP/.claude.json"
-    fi
+    /claude_backup.sh
+  done
+) &
+
+# Claude login page, served through Home Assistant ingress (the add-on's
+# "Open Web UI" button / sidebar panel). ttyd is a web terminal; the only
+# thing it runs is claude_login.sh's fixed menu around `claude auth`, never
+# a shell. Port 7681 isn't published in config.yaml, so it's reachable only
+# via Supervisor's ingress proxy (which requires a logged-in HA admin) on
+# the internal add-on network. Restarted if it ever exits.
+(
+  while true; do
+    ttyd --port 7681 --writable \
+      --client-option titleFixed="Claude login" \
+      --client-option disableLeaveAlert=true \
+      /claude_login.sh
+    sleep 5
   done
 ) &
 
