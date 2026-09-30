@@ -45,13 +45,13 @@ while true; do
     1)
       echo "Open the URL below in your browser, authorize, then paste the code back here."
       echo
-      as_node claude auth login
+      /claude_auth_login.py
       save_login
       ;;
     2)
       echo "Open the URL below in your browser, authorize, then paste the code back here."
       echo
-      as_node claude auth login --console
+      /claude_auth_login.py --console
       save_login
       ;;
     3)

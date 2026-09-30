@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.11
+
+- The Claude Login page now masks the pasted login code with asterisks,
+  leaving the last 4 characters and a character count visible. Before,
+  the code didn't show at all, so there was no sign the paste worked.
+  Claude's own prompt still shows nothing, so `claude_auth_login.py`
+  runs `claude auth login` in a pseudo-terminal, shows its own masked
+  prompt once the login URL has been printed, and types the code into
+  Claude when you press Enter.
+
 ## 1.0.10
 
 - Fixes the 1.0.9 image build failing: `ttyd` isn't packaged for Debian

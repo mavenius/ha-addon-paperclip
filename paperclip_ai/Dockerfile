@@ -51,7 +51,8 @@ COPY telegram_poll.sh /telegram_poll.sh
 COPY telegram_notify.sh /telegram_notify.sh
 COPY claude_backup.sh /claude_backup.sh
 COPY claude_login.sh /claude_login.sh
+COPY claude_auth_login.py /claude_auth_login.py
 RUN chmod a+x /run.sh /telegram_poll.sh /telegram_notify.sh \
-  /claude_backup.sh /claude_login.sh
+  /claude_backup.sh /claude_login.sh /claude_auth_login.py
 
 ENTRYPOINT ["/run.sh"]
